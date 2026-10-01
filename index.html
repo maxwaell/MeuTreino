@@ -31,9 +31,21 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .brand .logo{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;flex:none}
 .brand .logo svg{width:18px;height:18px}
 .brand b{font:700 18px/1 'Barlow Condensed',sans-serif;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap}
-.brand input{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:none;padding:3px 2px;
+.hello{display:flex;align-items:baseline;gap:8px;min-width:0}
+.hello input{flex:1;min-width:0;width:100%;border:0;border-bottom:2px dashed var(--line);background:none;padding:0 2px;color:var(--accent);font:700 52px/.85 'Barlow Condensed',Impact,sans-serif;letter-spacing:-.5px}
+.hello input:focus{border-bottom-color:var(--accent);outline:none}
+.hello input::placeholder{color:var(--mute);opacity:.45}
+.xx{
   font:700 18px/1 'Barlow Condensed',sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent)}
-.brand input::placeholder{color:var(--mute);opacity:.6}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 8px}
+.mgrid label{font-size:12px;color:var(--mute);font-weight:600;display:block;margin:10px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.mt{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+table.mt th{text-align:right;font-size:12px;color:var(--mute);font-weight:600;padding:4px 6px}
+table.mt th:first-child,table.mt td:first-child{text-align:left}
+table.mt td{text-align:right;padding:9px 6px;border-top:1px solid var(--line)}
+table.mt tr[data-act]{cursor:pointer}
+table.mt tr.on td{background:var(--surface2)}
+table.mt tr.on td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
 h1{margin:0;font:700 52px/.85 'Barlow Condensed',Impact,sans-serif;letter-spacing:-.5px}
 h2{margin:26px 0 10px;font:700 24px/1 'Barlow Condensed',sans-serif}
 .yr{font:600 20px 'Barlow Condensed',sans-serif;color:var(--mute);margin-left:6px}
@@ -206,7 +218,7 @@ input::placeholder,textarea::placeholder{color:var(--mute);opacity:.55;font-weig
 </head>
 <body>
 <div class="wrap"><div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg></span>
-<b>Meu Treino</b><input id="appName" maxlength="24" placeholder="seu nome aqui" aria-label="Nome exibido ao lado de Meu Treino" autocomplete="off"></div>
+<b>Meu Treino</b></div>
 <div id="view"></div></div>
 <nav class="tabs" id="tabs"></nav>
 <input type="file" id="importFile" accept="application/json" hidden>
@@ -276,7 +288,7 @@ const DEFAULT_PLANS = [
     E('Dead bug',2,'8–10/lado','Core','Core')]},
   { id:'mobB', type:'mob', name:'Mobilidade B', tag:'Mob B', color:'#a05ee6', min:20,
     focus:'Quadril + torácica + tornozelo + estabilidade do core', intensity:'Leve, sem dor',
-    note:'Depois vem o Pilates, que já dá bastante mobilidade e estabilidade: esta sessão não precisa ser longa.', ex:[
+    note:'Complemento ao Pilates, que já dá bastante mobilidade e estabilidade: esta sessão não precisa ser longa.', ex:[
     E('Foam roller — adutores',0,'30–45 s/lado','Adutores','Liberação miofascial'),
     E('Foam roller — dorsal/lats',0,'30–45 s/lado','Dorsais','Liberação miofascial'),
     E('Foam roller — coluna torácica',0,'6–8 movimentos','Torácica','Liberação miofascial'),
@@ -303,11 +315,11 @@ const DEFAULT_PLANS = [
     E('Canivete',2,'8–12','Reto abdominal + flexores','Abdômen'),
     E('Prancha lateral',2,'30–45 s/lado','Oblíquos/core','Abdômen')]},
   { id:'pil', type:'simple', name:'Pilates', tag:'Pilates', color:'#8a97aa', min:50,
-    focus:'Mobilidade, estabilidade e recuperação', intensity:'', note:'Depois da Mobilidade B.', ex:[
+    focus:'Mobilidade, estabilidade e recuperação', intensity:'', note:'Sessão principal da quarta. A Mobilidade B entra como complemento.', ex:[
     E('Aula de pilates',0,'1 aula','Recuperação')]}
 ];
 /* semana do app começa na quinta: [Qui, Sex, Sáb, Dom, Seg, Ter, Qua] */
-const DEFAULT_WEEK = [['fbA','runE'], ['fbC','mobC'], ['runQ'], ['fbD'], ['runE','mobA'], ['fbB'], ['mobB','pil']];
+const DEFAULT_WEEK = [['fbA','runE'], ['fbC','mobC'], ['runQ'], ['fbD'], ['runE','mobA'], ['fbB'], ['pil','mobB']];
 const TYPES = { gym:{ n:'Musculação', ic:'🏋️' }, run:{ n:'Corrida', ic:'🏃' }, mob:{ n:'Mobilidade', ic:'🧘' }, simple:{ n:'Atividade', ic:'🤸' } };
 const MET = { gym:5, mob:2.5, simple:3, run:0 };
 /* Cardio avulso: [id, nome, ícone, MET, conta como km corridos?, km padrão, min padrão] */
@@ -378,7 +390,7 @@ const KEY = 'meu-treino-v2', PREV_KEYS = ['saude-app-v1','treino-outubro-2026'];
 function defaultState(){
   const plans = DEFAULT_PLANS.map(p => Object.assign({}, p, { ex: p.ex.map((e,j) => Object.assign({ id:'e'+j }, e)) }));
   return { v:2, plans, week: DEFAULT_WEEK.map(d => d.slice()), schedule:{}, logs:{}, day:{}, water:{}, food:{},
-    weights:[], customFoods:[], appName:'', extra:{},
+    weights:[], measures:[], customFoods:[], appName:'', extra:{},
     profile:{ sex:'m', age:30, height:170, weight:70, activity:1.2, goal:'cut', protein:1.8, water:35, goalWeight:'' } };
 }
 let storageOK = true, S = defaultState();
@@ -394,10 +406,18 @@ try {
 } catch(e){ storageOK = false; }
 S.plans.forEach(p => { if (p.type === 'run'){ p.name = p.name.replace(/\s*[—-]\s*(fácil|qualidade|completo)\s*$/i, ''); if (p.tag === '10 km Q') p.tag = '10 km'; } });
 if (!S.extra) S.extra = {};
+if (!S.measures) S.measures = [];
+const isOldWed = a => Array.isArray(a) && a.length === 2 && a[0] === 'mobB' && a[1] === 'pil';
+if (isOldWed(S.week[6])) S.week[6] = ['pil','mobB'];
+for (const k in S.schedule) if (isOldWed(S.schedule[k])) S.schedule[k] = ['pil','mobB'];
+S.weights.forEach(w => {                     // cintura/% gordura antigos viram medidas
+  if (w.waist || w.bf){ let m = S.measures.find(x => x.d === w.d); if (!m) S.measures.push(m = { d:w.d, m:{} });
+    if (w.waist && !m.m.cintura) m.m.cintura = w.waist; if (w.bf && !m.m.bf) m.m.bf = w.bf; }
+  delete w.waist; delete w.bf; });
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ storageOK = false; } }
 
 const UI = { tab:'dash', month:0, sel:TODAY, sess:null, open:new Set(), fdate:TODAY, q:'', pick:null, g:'100',
-  meal:(() => { const h = new Date().getHours(); return h<10?0:h<15?1:h<18?2:h<22?3:4; })(), editPlan:null, custom:false, cx:null };
+  meal:(() => { const h = new Date().getHours(); return h<10?0:h<15?1:h<18?2:h<22?3:4; })(), editPlan:null, custom:false, cx:null, meas:false, mchart:null };
 UI.month = Math.max(0, MONTHS.findIndex(M => TODAY.startsWith(M.y+'-'+pad(M.m+1))));
 if (!TODAY.startsWith(MONTHS[UI.month].y+'-'+pad(MONTHS[UI.month].m+1))) UI.sel = kOf(MONTHS[UI.month].y, MONTHS[UI.month].m, 1);
 
@@ -492,6 +512,27 @@ function curWeight(){
   const w = [...S.weights].sort((a,b) => a.d < b.d ? -1 : 1);
   return w.length ? w[w.length-1].kg : num(S.profile.weight) || 70;
 }
+/* Medidas: [chave, nome, dica, melhora quando diminui?] */
+const MEASURES = [
+  ['pescoco','Pescoço','Logo abaixo do pomo de adão',false], ['ombros','Ombros','Maior circunferência, sobre os deltoides',false],
+  ['peito','Peito','Linha dos mamilos, após expirar',false], ['cintura','Cintura','Parte mais estreita, acima do umbigo',true],
+  ['abdomen','Abdômen','Na linha do umbigo, relaxado',true], ['quadril','Quadril','Maior circunferência dos glúteos',false],
+  ['bracoD','Braço D','Meio do braço, relaxado',false], ['bracoE','Braço E','Meio do braço, relaxado',false],
+  ['coxaD','Coxa D','Meio da coxa, em pé',false], ['coxaE','Coxa E','Meio da coxa, em pé',false],
+  ['pantD','Panturrilha D','Maior circunferência',false], ['pantE','Panturrilha E','Maior circunferência',false]
+];
+const MEAS_ALL = [...MEASURES, ['bf','% gordura','',true]];
+const measList = () => [...S.measures].sort((a,b) => a.d < b.d ? -1 : 1);
+function measEvolution(){
+  const ms = measList();
+  return MEAS_ALL.map(([key,name,,down]) => {
+    const pts = ms.filter(x => num(x.m[key])).map(x => ({ d:x.d, v:num(x.m[key]) }));
+    if (!pts.length) return null;
+    const first = pts[0].v, last = pts[pts.length-1].v;
+    return { key, name: key==='bf' ? name : name+' (cm)', pts, first, last, diff:last-first, n:pts.length, goodDown:down,
+      firstD:pts[0].d, lastD:pts[pts.length-1].d };
+  }).filter(Boolean);
+}
 function bmr(){ const p = S.profile; return 10*curWeight() + 6.25*num(p.height) - 5*num(p.age) + (p.sex==='f' ? -161 : 5); }
 const GOALS = { cut:{n:'Perder gordura',adj:-500}, keep:{n:'Manter',adj:0}, gain:{n:'Ganhar massa',adj:300} };
 function energy(k){
@@ -574,7 +615,7 @@ function renderDash(){
   const prs = Object.entries(pr).sort((a,b) => b[1].kg - a[1].kg).slice(0,5);
 
   const ts = sessions(TODAY), tst = stats(TODAY);
-  let h = '<div class="top"><div><h1>'+(S.appName ? 'Olá, '+esc(S.appName) : 'Resumo')+'</h1><div class="sub">'+longD(TODAY)+'</div></div>'
+  let h = '<div class="top"><div style="min-width:0;flex:1"><div class="hello"><h1>Olá,</h1><input id="appName" maxlength="20" value="'+esc(S.appName)+'" placeholder="seu nome" aria-label="Seu nome" autocomplete="off"></div><div class="sub">'+longD(TODAY)+'</div></div>'
     + '<div class="sum"><b>'+streak+'</b>'+(streak===1?'dia seguido':'dias seguidos')+'</div></div>';
   if (ts.length) h += '<div class="card" style="border-left:4px solid '+ts[0].color+'"><div class="lbl">Hoje</div>'
     + ts.map(p => { const s = statsOf(TODAY, sessionItems(p));
@@ -615,6 +656,7 @@ function renderDash(){
   h += '<h2>Corpo</h2><div class="kpis">'
     + '<div class="kpi"><div class="lbl">Peso atual</div><div class="v">'+fmt(curWeight(),1)+'<small>kg</small></div><div class="d">'
     + (firstW && lastW && firstW !== lastW ? ((lastW.kg-firstW.kg)<=0?'<span class="up">':'<span class="down">')+(lastW.kg-firstW.kg>0?'+':'')+fmt(lastW.kg-firstW.kg,1)+' kg desde '+fmtD(firstW.d)+'</span>' : 'Do perfil')+'</div></div>'
+    + (()=>{ const c = measEvolution().find(x => x.key==='cintura'); return c ? '<div class="kpi"><div class="lbl">Cintura</div><div class="v">'+fmt(c.last,1)+'<small>cm</small></div><div class="d">'+(c.n>1?'<span class="'+(c.diff<=0?'up':'down')+'">'+(c.diff>0?'+':'')+fmt(c.diff,1)+' cm desde '+fmtD(c.firstD)+'</span>':'Primeira medida')+'</div></div>' : ''; })()
     + '<div class="kpi"><div class="lbl">IMC</div><div class="v">'+fmt(curWeight()/Math.pow(num(S.profile.height)/100||1.7,2),1)+'</div><div class="d">Altura '+esc(S.profile.height)+' cm</div></div></div>';
   if (ws2.length > 1) h += '<div class="card"><div class="lbl">Peso (kg)</div>'+lineChart(ws2.slice(-10).map(w => ({ y:w.kg, label:fmtD(w.d) })), 'var(--accent)')+'</div>';
   h += '<div class="row" style="margin-top:22px;justify-content:center"><button class="pill pri" data-act="excel">📊 Exportar para Excel</button></div>';
@@ -815,33 +857,58 @@ function renderFood(){
 }
 
 /* =========================================================
-   ABA: PESO
+   ABA: CORPO (peso + medidas)
    ========================================================= */
 function renderWeight(){
   const ws = [...S.weights].sort((a,b) => a.d < b.d ? -1 : 1), last = ws[ws.length-1];
   const since = last ? Math.round((parseK(TODAY) - parseK(last.d))/864e5) : null, goalW = num(S.profile.goalWeight);
-  let h = '<h1>Peso</h1><div class="sub">Pese-se ao menos uma vez por semana, de preferência na quinta (início do ciclo), em jejum.</div>';
+  const ms = measList(), lastM = ms[ms.length-1], prevVal = key => { for (let i=ms.length-1; i>=0; i--) if (num(ms[i].m[key])) return num(ms[i].m[key]); return 0; };
+  let h = '<h1>Corpo</h1><div class="sub">Peso ao menos 1× por semana (de preferência na quinta, em jejum). Medidas a cada 2–4 semanas, sempre no mesmo horário.</div>';
+
   h += '<div class="card"><div class="f"><div><label>Data</label><input class="inp" type="date" id="wD" value="'+TODAY+'"></div>'
-    + '<div><label>Peso (kg)</label><input class="num" id="wK" inputmode="decimal" placeholder="'+fmt(curWeight(),1)+'"></div>'
-    + '<div><label>Cintura (cm, opcional)</label><input class="num" id="wC" inputmode="decimal"></div>'
-    + '<div><label>% gordura (opcional)</label><input class="num" id="wF" inputmode="decimal"></div></div>'
-    + '<div class="row" style="margin-top:12px"><button class="pill pri" data-act="addWeight">Registrar pesagem</button></div></div>';
+    + '<div><label>Peso (kg)</label><input class="num" id="wK" inputmode="decimal" placeholder="'+fmt(curWeight(),1)+'"></div></div>'
+    + '<button class="plan-h" data-act="toggleMeas" style="margin-top:14px"><span class="pn" style="flex:1">📏 Medidas (cm) e % de gordura <span class="pf">· opcional</span></span>'+CHEV+'</button>';
+  if (UI.meas){
+    h += '<div class="mgrid">'+MEASURES.map(([k,n,hint]) => { const p = prevVal(k);
+      return '<div><label for="m_'+k+'">'+n+'</label><input class="num" id="m_'+k+'" inputmode="decimal" placeholder="'+(p?fmt(p,1):'cm')+'" title="'+esc(hint)+'"></div>'; }).join('')
+      + '<div><label for="m_bf">% gordura</label><input class="num" id="m_bf" inputmode="decimal" placeholder="'+(prevVal('bf')?fmt(prevVal('bf'),1):'%')+'"></div></div>'
+      + '<div class="sub">Os números em cinza são a última medida. Meça com fita, sem apertar, sempre do mesmo lado/ponto.</div>';
+  }
+  h += '<div class="row" style="margin-top:12px"><button class="pill pri" data-act="addWeight">Registrar</button></div></div>';
+
   h += '<div class="kpis" style="margin-top:10px">'
-    + '<div class="kpi"><div class="lbl">Atual</div><div class="v">'+fmt(curWeight(),1)+'<small>kg</small></div><div class="d">'+(since===null?'Sem pesagens':since===0?'Pesado hoje':'Há '+since+' dia'+(since>1?'s':''))+'</div></div>'
+    + '<div class="kpi"><div class="lbl">Peso atual</div><div class="v">'+fmt(curWeight(),1)+'<small>kg</small></div><div class="d">'+(since===null?'Sem pesagens':since===0?'Pesado hoje':'Há '+since+' dia'+(since>1?'s':''))+'</div></div>'
     + '<div class="kpi"><div class="lbl">Meta</div><div class="v">'+(goalW?fmt(goalW,1)+'<small>kg</small>':'–')+'</div><div class="d">'+(goalW?'Faltam '+fmt(Math.abs(curWeight()-goalW),1)+' kg':'Defina em Plano › Perfil')+'</div></div></div>';
   if (since !== null && since >= 7) h += '<div class="alert">Sua pesagem semanal está atrasada.</div>';
   if (ws.length > 1){
-    const pts = ws.slice(-12);
-    h += '<div class="card"><div class="lbl">Evolução</div>'+lineChart(pts.map(w => ({ y:w.kg, label:fmtD(w.d) })), 'var(--accent)');
+    h += '<div class="card"><div class="lbl">Peso (kg)</div>'+lineChart(ws.slice(-12).map(w => ({ y:w.kg, label:fmtD(w.d) })), 'var(--accent)');
     const wk = (ws[ws.length-1].kg - ws[0].kg) / Math.max(1, (parseK(ws[ws.length-1].d) - parseK(ws[0].d))/864e5/7);
     h += '<div class="sub">Ritmo médio: <b>'+(wk>0?'+':'')+fmt(wk,2)+' kg/semana</b>'+(S.profile.goal==='cut' && wk<-1 ? ' — rápido demais; considere comer um pouco mais.' : '')+'</div></div>';
-    const wc = pts.filter(w => w.waist);
-    if (wc.length > 1) h += '<div class="card"><div class="lbl">Cintura (cm)</div>'+lineChart(wc.map(w => ({ y:w.waist, label:fmtD(w.d) })), 'var(--ok)')+'</div>';
   }
-  if (ws.length) h += '<div class="card"><div class="lbl">Histórico</div><ul class="list">'
-    + ws.slice().reverse().map((w,i,a) => { const prev = a[i+1], df = prev ? w.kg - prev.kg : 0;
-      return '<li><span>'+fmtD(w.d)+' · <b>'+fmt(w.kg,1)+' kg</b>'+(w.waist?' · '+fmt(w.waist)+' cm':'')+(w.bf?' · '+fmt(w.bf,1)+'%':'')+'</span>'
-        + '<span><span class="'+(df<0?'up':df>0?'down':'')+'">'+(prev?(df>0?'+':'')+fmt(df,1):'')+'</span> <button class="x" data-act="delWeight" data-d="'+w.d+'" aria-label="Remover">×</button></span></li>'; }).join('')
+
+  /* evolução das medidas */
+  const ev = measEvolution();
+  if (ev.length){
+    if (!ev.some(x => x.key === UI.mchart)) UI.mchart = ev[0].key;
+    const sel = ev.find(x => x.key === UI.mchart);
+    h += '<h2>Medidas</h2><div class="card"><div class="lbl">Evolução'+(lastM ? ' · última em '+fmtD(lastM.d) : '')+'</div><table class="mt"><thead><tr><th>Medida</th><th>Início</th><th>Atual</th><th>Δ</th></tr></thead><tbody>'
+      + ev.map(x => { const good = x.goodDown ? x.diff < 0 : x.diff > 0;
+          return '<tr data-act="mchart" data-k="'+x.key+'"'+(x.key===UI.mchart?' class="on"':'')+'><td>'+esc(x.name)+'</td><td>'+fmt(x.first,1)+'</td><td><b>'+fmt(x.last,1)+'</b></td>'
+            + '<td class="'+(x.n>1 && x.diff ? (good?'up':'down') : '')+'">'+(x.n>1 ? (x.diff>0?'+':'')+fmt(x.diff,1) : '–')+'</td></tr>'; }).join('')
+      + '</tbody></table><div class="sub">Toque numa medida para ver o gráfico. Verde = evolução a favor do objetivo (cintura/abdômen/% gordura caindo; braço, coxa, peito subindo).</div>'
+      + '<div class="lbl" style="margin-top:12px">'+esc(sel.name)+'</div>'+lineChart(sel.pts.slice(-12).map(p => ({ y:p.v, label:fmtD(p.d) })), 'var(--ok)')
+      + (num(lastM && lastM.m.cintura) && num(S.profile.height) ? '<div class="sub">Relação cintura/altura: <b>'+fmt(num(lastM.m.cintura)/num(S.profile.height),2)+'</b> (abaixo de 0,50 é o ideal de referência).</div>' : '')
+      + '</div>';
+  }
+
+  /* histórico */
+  const dates = [...new Set([...ws.map(w => w.d), ...ms.map(m => m.d)])].sort().reverse();
+  if (dates.length) h += '<div class="card"><div class="lbl">Histórico</div><ul class="list">'
+    + dates.map(d => { const w = ws.find(x => x.d === d), m = ms.find(x => x.d === d), wi = w ? ws.indexOf(w) : -1, df = wi > 0 ? w.kg - ws[wi-1].kg : 0;
+        const mt = m ? Object.keys(m.m).filter(k => num(m.m[k])).length : 0;
+        return '<li><span>'+fmtD(d)+(w ? ' · <b>'+fmt(w.kg,1)+' kg</b> <span class="'+(df<0?'up':df>0?'down':'')+'">'+(wi>0?'('+(df>0?'+':'')+fmt(df,1)+')':'')+'</span>' : '')
+          + (mt ? '<br><span class="sub" style="margin:0">📏 '+mt+' medida'+(mt>1?'s':'')+(num(m.m.cintura)?' · cintura '+fmt(num(m.m.cintura),1):'')+(num(m.m.bf)?' · '+fmt(num(m.m.bf),1)+'% gord.':'')+'</span>' : '')+'</span>'
+          + '<button class="x" data-act="delWeight" data-d="'+d+'" aria-label="Remover registro">×</button></li>'; }).join('')
     + '</ul></div>';
   return h;
 }
@@ -908,7 +975,7 @@ function renderPlan(){
     + '<div><label>Peso-meta (kg)</label>'+inp('goalWeight','—')+'</div></div>'
     + '<div class="sub">Basal '+fmt(bmr())+' kcal · com rotina '+fmt(e.base)+' kcal · proteína '+proteinTarget()+' g/dia · água '+fmt(waterGoal()/1000,1)+' L/dia. Os treinos feitos somam ao gasto automaticamente.</div></div>';
 
-  h += '<h2>Backup</h2><div class="card"><div class="sub" style="margin-top:0">O Excel traz resumo, treinos, evolução de cargas, séries, cardio, nutrição e peso. O backup JSON serve para restaurar o app.</div>'
+  h += '<h2>Backup</h2><div class="card"><div class="sub" style="margin-top:0">O Excel traz resumo, treinos, evolução de cargas, séries, cardio, nutrição, peso e medidas. O backup JSON serve para restaurar o app.</div>'
     + '<div class="row" style="margin-top:10px"><button class="pill pri" data-act="excel">📊 Exportar Excel</button><button class="pill" data-act="export">Backup (JSON)</button><button class="pill" data-act="import">Importar</button><button class="pill danger" data-act="reset">Apagar tudo</button></div></div>';
   return h;
 }
@@ -1015,7 +1082,7 @@ function workbookData(){
   Object.keys(S.logs).concat(Object.keys(S.extra), Object.keys(S.food), Object.keys(S.water)).forEach(k => { if (!days.includes(k)) days.push(k); });
   days.sort();
   const active = days.filter(k => S.logs[k] || S.extra[k] || (k <= TODAY && sessions(k).length));
-  const name = S.appName ? 'Meu Treino — ' + S.appName : 'Meu Treino';
+  const name = S.appName ? 'Meu Treino — ' + S.appName : 'Meu Treino';  // planilha identifica o dono
 
   /* 1. Treinos (diário) */
   const tr = [H(['Data','Dia','Programado','Sessões concluídas','Itens feitos','Itens totais','% do dia','Musculação (kg)','Séries','Km','Cardio (min)','Cardio avulso','Esforço (1-10)','Gasto treino (kcal)','Anotações'])];
@@ -1027,7 +1094,6 @@ function workbookData(){
     tr.push([DT(k), WEEK[wkIdx(k)], ss.map(p => p.name).join(' + ') || 'Livre', doneNames.join(' + '), I(st.done), I(st.total),
       st.total ? { f:'IF(F'+r+'>0,E'+r+'/F'+r+',"")', v:st.done/st.total, s:X.pct } : '', D(m.vol), I(m.sets), D(m.km), I(m.cmin), xs, D0.rpe ? I(D0.rpe) : '', I(exerciseKcal(k)), D0.note || '']);
   });
-
   /* 2. Séries */
   const se = [H(['Data','Sessão','Exercício','Série','Repetições','Carga (kg)','Volume (kg)','Feita'])];
   Object.keys(S.logs).sort().forEach(k => { for (const id in S.logs[k]){ const e = S.logs[k][id]; if (!e.sets) continue;
@@ -1068,10 +1134,26 @@ function workbookData(){
 
   /* 6. Peso */
   const ws = [...S.weights].sort((a,b) => a.d < b.d ? -1 : 1), hm = num(S.profile.height)/100 || 1.7;
-  const pe = [H(['Data','Peso (kg)','Variação (kg)','Variação acumulada (kg)','IMC','Cintura (cm)','% gordura'])];
+  const pe = [H(['Data','Peso (kg)','Variação (kg)','Variação acumulada (kg)','IMC'])];
   ws.forEach((w,i) => { const r = pe.length + 1;
     pe.push([DT(w.d), D(w.kg), i ? { f:'B'+r+'-B'+(r-1), v:w.kg-ws[i-1].kg, s:X.d1 } : '', { f:'B'+r+'-$B$2', v:w.kg-ws[0].kg, s:X.d1 },
-      { f:'B'+r+'/'+(hm*hm).toFixed(4), v:w.kg/(hm*hm), s:X.d1 }, w.waist ? D(w.waist) : '', w.bf ? D(w.bf) : '']); });
+      { f:'B'+r+'/'+(hm*hm).toFixed(4), v:w.kg/(hm*hm), s:X.d1 }]); });
+
+  /* 6b. Medidas: registros (uma linha por data) + evolução */
+  const ml = measList();
+  const md = [H(['Data','Peso (kg)', ...MEASURES.map(m => m[1]+' (cm)'), '% gordura', 'Cintura/altura'])];
+  const cCol = colL(2 + MEASURES.findIndex(m => m[0]==='cintura'));
+  ml.forEach(x => { const r = md.length + 1, w = S.weights.find(y => y.d === x.d);
+    md.push([DT(x.d), w ? D(w.kg) : '', ...MEAS_ALL.map(([k]) => num(x.m[k]) ? D(num(x.m[k])) : ''),
+      num(x.m.cintura) && num(S.profile.height) ? { f:'IFERROR('+cCol+r+'/'+num(S.profile.height)+',"")', v:num(x.m.cintura)/num(S.profile.height), s:X.d1 } : '']); });
+  const mev = measEvolution();
+  const me = [H(['Medida','Medições','Primeira data','Inicial','Última data','Atual','Variação','Variação (%)','Mínimo','Máximo','Tendência','Histórico'])];
+  mev.forEach(x => { const r = me.length + 1, good = x.goodDown ? x.diff < 0 : x.diff > 0;
+    me.push([B(x.name), I(x.n), DT(x.firstD), D(x.first), DT(x.lastD), D(x.last), { f:'F'+r+'-D'+r, v:x.diff, s:X.d1 },
+      { f:'IF(D'+r+'>0,(F'+r+'-D'+r+')/D'+r+',"")', v:x.first ? x.diff/x.first : 0, s:X.pct },
+      D(Math.min(...x.pts.map(p => p.v))), D(Math.max(...x.pts.map(p => p.v))),
+      x.n < 2 || !x.diff ? 'Estável / sem comparação' : good ? '▲ A favor do objetivo' : '▼ Atenção',
+      x.pts.map(p => fmtD(p.d)+': '+fmt(p.v,1)).join(' → ')]); });
 
   /* 7. Resumo (board) */
   let planned = 0, full = 0, gym = 0, mob = 0, km = 0, vol = 0, sets = 0, xN = 0, xMin = 0; const rpe = [];
@@ -1093,6 +1175,8 @@ function workbookData(){
     ['Peso inicial (kg)', ws.length ? D(ws[0].kg) : D(num(S.profile.weight)), ws.length ? fmtD(ws[0].d) : 'Do perfil'],
     ['Peso atual (kg)', D(curWeight()), ws.length ? fmtD(ws[ws.length-1].d) : 'Do perfil'],
     ['Variação de peso (kg)', ws.length > 1 ? D(ws[ws.length-1].kg - ws[0].kg) : '–', ws.length+' pesagens'],
+    ...measEvolution().filter(x => ['cintura','abdomen','quadril','bracoD','coxaD','bf'].includes(x.key)).map(x =>
+      [x.name, D(x.last), x.n > 1 ? (x.diff>0?'+':'')+fmt(x.diff,1)+(x.key==='bf'?' p.p.':' cm')+' desde '+fmtD(x.firstD) : 'Primeira medida']),
     ['Peso-meta (kg)', num(S.profile.goalWeight) ? D(num(S.profile.goalWeight)) : '–', ''],
     ['Média consumida (kcal/dia)', fd.length ? I(Math.round(avg(k => foodTotals(k).kcal))) : '–', fd.length+' dias com refeições registradas'],
     ['Média de proteína (g/dia)', fd.length ? D(avg(k => foodTotals(k).p)) : '–', 'Meta: '+proteinTarget()+' g/dia'],
@@ -1118,7 +1202,9 @@ function workbookData(){
     { name:'Corridas e cardio', rows:ca, widths:[12,10,28,9,12,14,16], freeze:1, filter:1 },
     { name:'Nutrição', rows:nu, widths:[12,15,12,15,12,10,19,14,16,16], freeze:1, filter:1 },
     { name:'Refeições', rows:re, widths:[12,16,30,14,8,12,15,12], freeze:1, filter:1 },
-    { name:'Peso', rows:pe, widths:[12,11,13,22,8,13,11], freeze:1 }
+    { name:'Peso', rows:pe, widths:[12,11,13,22,8], freeze:1 },
+    { name:'Medidas', rows:md, widths:[12,10, ...MEASURES.map(() => 12), 10, 13], freeze:1, filter:1 },
+    { name:'Evolução de medidas', rows:me, widths:[20,10,13,9,13,9,10,12,9,9,24,60], freeze:1 }
   ];
 }
 function exportExcel(){
@@ -1136,10 +1222,10 @@ const TABS = [
   ['dash','Resumo','<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>'],
   ['train','Treinos','<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>'],
   ['food','Comida','<path d="M7 3v8a3 3 0 0 0 3 3v7M7 3v5M10 3v5M4 3v5a3 3 0 0 0 3 3M17 21V3c-2 1-3 4-3 7s1 4 3 4"/>'],
-  ['peso','Peso','<path d="M5 20h14l-2-12H7zM12 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>'],
+  ['peso','Corpo','<path d="M5 20h14l-2-12H7zM12 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>'],
   ['plan','Plano','<path d="M4 6h16M4 12h10M4 18h7M18 15l3 3-3 3"/>']
 ];
-function setTitle(){ document.title = 'Meu Treino' + (S.appName ? ' ' + S.appName : ''); }
+function setTitle(){ document.title = 'Meu Treino'; }
 function render(keepScroll){
   const y = window.scrollY;
   document.getElementById('view').innerHTML = UI.tab==='dash' ? renderDash() : UI.tab==='train' ? renderTrain() : UI.tab==='food' ? renderFood() : UI.tab==='peso' ? renderWeight() : renderPlan();
@@ -1201,10 +1287,15 @@ document.addEventListener('click', ev => {
     S.customFoods.push({ name:g('cfN').trim(), kcal:num(g('cfK')), p:num(g('cfP')), c:num(g('cfC')), f:num(g('cfF')), g:num(g('cfG'))||100 }); break; }
   case 'delCustom': S.customFoods.splice(i,1); break;
   case 'addWeight': { const d = document.getElementById('wD').value || TODAY, kg = num(document.getElementById('wK').value);
-    if (!kg){ alert('Informe o peso.'); return; }
-    S.weights = S.weights.filter(w => w.d !== d);
-    S.weights.push({ d, kg, waist:num(document.getElementById('wC').value)||null, bf:num(document.getElementById('wF').value)||null }); break; }
-  case 'delWeight': S.weights = S.weights.filter(w => w.d !== t.dataset.d); break;
+    const m = {}; if (UI.meas) MEAS_ALL.forEach(([key]) => { const el = document.getElementById('m_'+key); if (el && num(el.value)) m[key] = num(el.value); });
+    if (!kg && !Object.keys(m).length){ alert('Informe o peso ou ao menos uma medida.'); return; }
+    if (kg){ S.weights = S.weights.filter(w => w.d !== d); S.weights.push({ d, kg }); }
+    if (Object.keys(m).length){ const ex = S.measures.find(x => x.d === d); if (ex) Object.assign(ex.m, m); else S.measures.push({ d, m }); }
+    UI.meas = false; break; }
+  case 'delWeight': if (!confirm('Remover peso e medidas de '+fmtD(t.dataset.d)+'?')) return;
+    S.weights = S.weights.filter(w => w.d !== t.dataset.d); S.measures = S.measures.filter(x => x.d !== t.dataset.d); break;
+  case 'toggleMeas': UI.meas = !UI.meas; render(true); return;
+  case 'mchart': UI.mchart = t.dataset.k; render(true); return;
   case 'weekDel': S.week[i] = S.week[i].filter(x => x !== t.dataset.p); break;
   case 'resetWeek': if (!confirm('Voltar a ficha semanal para a versão original?')) return; S.week = DEFAULT_WEEK.map(d => d.slice()); break;
   case 'editPlan': UI.editPlan = UI.editPlan === id ? null : id; render(true); return;
@@ -1231,7 +1322,7 @@ document.addEventListener('click', ev => {
 
 document.addEventListener('input', ev => {
   const t = ev.target, ds = t.dataset || {};
-  if (t.id === 'appName'){ S.appName = t.value.trim(); setTitle(); save(); if (UI.tab === 'dash') render(true); return; }
+  if (t.id === 'appName'){ S.appName = t.value.trim(); save(); return; }
   if (ds.f){
     const it = findItem(ds.id); if (!it) return; const e = entry(UI.sel, it);
     if (ds.f === 'r' || ds.f === 'k') e.sets[+ds.i][ds.f] = t.value; else e[ds.f] = t.value;
@@ -1263,7 +1354,7 @@ document.addEventListener('change', ev => {
   save(); render(true);
 });
 
-function syncName(){ document.getElementById('appName').value = S.appName || ''; setTitle(); }
+function syncName(){ setTitle(); }
 syncName(); render();
 </script>
 </body>
